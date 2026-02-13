@@ -37,7 +37,7 @@ def retry(max_attempts=3, delay=0.5):
                     if attempt == max_attempts:
                         break
                     print(
-                        f'ClickIntercepted in {func.__name__!r}. Retrying momentarily...'
+                        f'\033[93mClickIntercepted in {func.__name__!r}. Retrying momentarily...\033[0m'
                     )
                     sleep(delay)
 
