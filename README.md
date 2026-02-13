@@ -9,15 +9,18 @@ other forms.
 - Copy `.env-example` to `.env`
 - Copy `example-config.yml` to `config.yml`
 - Edit `core.py` to match your form (i.e. XPath patterns, actions, and substitutions)
-- Add/remove any desired fields to `eventform.py`
+- Add/remove any desired data fields to `eventform.py`
+- Create a new Firefox browser profile for Selenium to use
+- In that profile, log in to your presence.io subdomain
+- Run `uv run main.py`
 
 # Configuration
 
 ## Environment Variables
 
-- `FORM_URL`: URL of the form to fill out (i.e. `https://yourdomain.presence.io/admin/Event/create`)
-- `FIREFOX_BIN_PATH`: Path to Firefox executable (optional) (i.e. `/snap/firefox/current/usr/lib/firefox/firefox`)
-- `FIREFOX_PROFILE_PATH`: Path to Firefox profile (i.e. `/home/user/.mozilla/firefox/xxxxxxxx.selenium`)
+- `FORM_URL`: URL of the form to visit and fill out.
+- `FIREFOX_PROFILE_PATH`: Path to Firefox profile directory.
+- `FIREFOX_BIN_PATH`: Path to Firefox executable (optional).
 
 See `.env-example` for examples.
 
@@ -25,3 +28,5 @@ See `.env-example` for examples.
 
 Form data can be directly passed to an `EventForm` object, or loaded from a
 YAML template and overridden as needed.
+
+See `example-config.yml` for examples.
