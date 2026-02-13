@@ -1,7 +1,7 @@
 [project]
-name = "acm-meeting-automation"
+name = "presence-form-automation"
 version = "0.1.0"
-description = "Add your description here"
+description = "Automates Presence.io form submissions"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
