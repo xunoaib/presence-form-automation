@@ -1,0 +1,46 @@
+host: <insert_host_organization>
+event_name: Weekly Meeting
+about_html: Join us for our weekly meeting!
+location: <insert_building_room>
+contact_person: John Doe
+is_virtual: No
+contact_email: user@example.com
+contact_phone: 555-555-5555
+attendance_goal: "10"
+need_access_beforehand: No
+estimated_attendance: "10"
+agency_account: N/A
+
+tags:
+  - Club Meeting/Business
+  - Learning/Training
+  - Social
+
+after_2pm_or_weekend: Yes
+hired_speaker: No
+agency_account_number: N/A
+payment_expenses_source: agency account
+event_creator_source: Recognized Student Organization
+is_submitter_in_charge: Yes
+is_multi_org_collab: No
+is_religious: No
+is_money_exchanged: No
+is_parking_needed: No
+is_serving_food: No
+is_serving_alcohol: No
+inside_or_outside: Inside
+facility_or_space: <insert_building_name>
+requested_room: Room I Want Is Not Listed
+room_if_unlisted: <insert_building_room>
+requested_setup: As Is
+need_additional_equipment: No
+event_notes_html: ""
+budget: ""
+cost: ""
+rsvp_link: https://url-to-rsvp
+cover_image_file_path: cover.jpg
+on_or_off_campus: Event is on campus
+
+# These are best specified elsewhere
+# start_time: YYYY-MM-DD HH:MM
+# end_time: YYYY-MM-DD HH:MM
