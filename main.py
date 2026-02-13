@@ -2,14 +2,12 @@ import os
 import sys
 import traceback
 from datetime import date, datetime, time, timedelta
-from time import sleep
 
 from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 
-from core import (fill_event_registration_form, form_has_loaded,
-                  show_submission_menu)
+from core import fill_event_registration_form, show_submission_menu
 from eventform import EventForm
 
 load_dotenv()
@@ -74,11 +72,6 @@ def main():
         or 'y'
     ).lower() != 'y':
         return
-
-    print('Waiting for form to be ready... ', end='', flush=True)
-    while not form_has_loaded(driver):
-        sleep(1)
-    print('done')
 
     try:
         fill_event_registration_form(driver, data)

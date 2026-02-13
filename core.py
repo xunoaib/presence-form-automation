@@ -140,6 +140,11 @@ def fill_event_registration_form(driver: WebDriver, data: EventForm):
     This can also serve as reference for automating other forms.
     '''
 
+    print('Waiting for form to be ready... ', end='', flush=True)
+    while not form_has_loaded(driver):
+        sleep(1)
+    print('done')
+
     select = partial(select_option, driver)
     rich = partial(fill_rich_form, driver)
     text = partial(fill_text_field, driver)
