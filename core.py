@@ -205,34 +205,28 @@ def fill_event_registration_form(driver: WebDriver, data: EventForm):
         data.estimated_attendance
     )
 
-    to_click = [
-        (
-            'Are you the person In charge of planning/managing this event for your organization?',
-            data.is_submitter_in_charge
-        ),
-        (
-            'Are you collaborating/partnering with other student organizations',
-            data.is_multi_org_collab
-        ),
-        ('Does the event have content that is religious', data.is_religious),
-        ('Will money be exchanged', data.is_money_exchanged),
-        (
-            'students, faculty or staff, will your event guests, participants, vendors, etc. need to park on campus?',
-            data.is_parking_needed
-        ),
-        ('Do you plan to serve food at your event?', data.is_serving_food),
-        (
-            'Do you plan to have alcohol be served/consumed during this event?',
-            data.is_serving_alcohol
-        ),
-        (
-            'Is this event being held inside or outside?',
-            data.inside_or_outside
-        ),
-    ]
-
-    for search, option in to_click:
-        click(search, option)
+    click(
+        'Are you the person In charge of planning/managing this event for your organization?',
+        data.is_submitter_in_charge
+    )
+    click(
+        'Are you collaborating/partnering with other student organizations',
+        data.is_multi_org_collab
+    )
+    click('Does the event have content that is religious', data.is_religious)
+    click('Will money be exchanged', data.is_money_exchanged)
+    click(
+        'students, faculty or staff, will your event guests, participants, vendors, etc. need to park on campus?',
+        data.is_parking_needed
+    )
+    click('Do you plan to serve food at your event?', data.is_serving_food)
+    click(
+        'Do you plan to have alcohol be served/consumed during this event?',
+        data.is_serving_alcohol
+    )
+    click(
+        'Is this event being held inside or outside?', data.inside_or_outside
+    )
 
     select(
         'What facility/space do you want to reserve', data.facility_or_space
