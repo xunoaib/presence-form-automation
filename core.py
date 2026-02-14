@@ -92,7 +92,9 @@ def select_option(driver: WebDriver, desc_contains: str, option_contains: str):
     option.click()
 
 
-def fill_rich_form(driver: WebDriver, contains_str: str, fill_value: str):
+def fill_rich_form(driver: WebDriver, contains_str: str, fill_html: str):
+    print(f'Filling HTML text area : {contains_str}')
+
     # switch to HTML mode
     buttons = xpath(
         driver,
@@ -101,13 +103,16 @@ def fill_rich_form(driver: WebDriver, contains_str: str, fill_value: str):
     assert len(buttons) == 1
     buttons[0].click()
 
-    form, *_ = xpath(
+    area = xpath(
         driver,
-        f'//*[contains(text(),"{contains_str}")]/..//textarea[@ng-model="html"]'
+        f'//*[contains(text(),"{contains_str}")]/..//*[@contenteditable]'
+    )[0]
+
+    driver.execute_script(
+        'arguments[0].innerHTML = arguments[1];', area, fill_html
     )
-    form.clear()
-    form.click()
-    form.send_keys(fill_value)
+
+    buttons[0].click()  # click again to refresh state
 
 
 @retry(max_attempts=3, delay=1)
