@@ -16,7 +16,7 @@ from eventform import EventForm
 load_dotenv()
 
 DATE_FILE = Path('submitted_dates.json')
-START_TIME = time(hour=15, minute=45)
+START_TIME = time(hour=15, minute=30)
 END_TIME = time(hour=18, minute=45)
 
 
