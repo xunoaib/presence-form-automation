@@ -2,9 +2,9 @@ import json
 import os
 import sys
 import traceback
+from collections.abc import Iterable
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
-from typing import Iterable
 
 from dotenv import load_dotenv
 from selenium import webdriver
