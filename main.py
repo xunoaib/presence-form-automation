@@ -15,7 +15,6 @@ from eventform import EventForm
 
 load_dotenv()
 
-
 DATE_FILE = Path('submitted_dates.json')
 START_TIME = time(hour=15, minute=45)
 END_TIME = time(hour=18, minute=45)
@@ -68,8 +67,7 @@ def get_next_sat_times(submitted_dates: Iterable[str] | None = None):
 def main():
     FORM_URL = os.environ['FORM_URL']
 
-    submitted_dates = json.load(
-        DATE_FILE.open()) if DATE_FILE.exists() else []
+    submitted_dates = json.load(DATE_FILE.open()) if DATE_FILE.exists() else []
     assert isinstance(submitted_dates, list)
 
     start_time, end_time = get_next_sat_times(submitted_dates)
@@ -118,7 +116,9 @@ def main():
 
     print('philled')
 
-    if choice == '1' and (input('\nUpdate dates? [Y/n] ').lower() or 'y') == 'y':
+    if choice == '1' and (
+        input('\nUpdate dates? [Y/n] ').lower() or 'y'
+    ) == 'y':
         print('saving')
         submitted_dates.append(start_time.strftime('%Y-%m-%d'))
         with DATE_FILE.open('w') as f:
