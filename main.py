@@ -35,6 +35,13 @@ def format_datetime(dt: datetime):
     return dt.strftime('%Y-%m-%d %H:%M')
 
 
+def confirm(prompt: str, auto_yes: bool = False) -> bool:
+    if auto_yes:
+        print(prompt + 'y')
+        return True
+    return (input(prompt).lower() or 'y') == 'y'
+
+
 def get_options(profile_location=None, binary_location=None):
     options = Options()
 
@@ -65,6 +72,8 @@ def get_next_sat_times(submitted_dates: Iterable[str] | None = None):
 
 
 def main():
+    auto_yes = '-y' in sys.argv or '--yes' in sys.argv
+
     FORM_URL = os.environ['FORM_URL']
 
     submitted_dates = json.load(DATE_FILE.open()) if DATE_FILE.exists() else []
@@ -75,7 +84,7 @@ def main():
     print('Start:', start_time)
     print('End:  ', end_time)
 
-    if (input('\nGood? [Y/n] ').lower() or 'y') != 'y':
+    if not confirm('\nGood? [Y/n] ', auto_yes):
         print('exiting')
         return
 
@@ -99,9 +108,9 @@ def main():
     if '-d' in sys.argv:
         __import__('pdb').set_trace()
 
-    if (
-        input('Automate filling out form now (without submitting)? [Y/n] ') or 'y'
-    ).lower() != 'y':
+    if not confirm(
+        'Automate filling out form now (without submitting)? [Y/n] ', auto_yes
+    ):
         return
 
     choice = None
@@ -115,15 +124,8 @@ def main():
 
     print('philled')
 
-    if (
-        choice == '1'
-        and (
-            input(
-                '\nAdd this date to the local log (to avoid resubmission)? [Y/n] '
-            ).lower()
-            or 'y'
-        )
-        == 'y'
+    if choice == '1' and confirm(
+        '\nAdd this date to the local log (to avoid resubmission)? [Y/n] ', auto_yes
     ):
         print('saving')
         submitted_dates.append(start_time.strftime('%Y-%m-%d'))
