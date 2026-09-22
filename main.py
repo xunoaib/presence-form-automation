@@ -85,7 +85,7 @@ def main():
             'start_time': format_datetime(start_time),
             'end_time': format_datetime(end_time),
             'about_html': Path('about.html').read_text(),
-        }
+        },
     )
 
     options = get_options(
@@ -100,8 +100,7 @@ def main():
         __import__('pdb').set_trace()
 
     if (
-        input('Automate filling out form now (without submitting)? [Y/n] ')
-        or 'y'
+        input('Automate filling out form now (without submitting)? [Y/n] ') or 'y'
     ).lower() != 'y':
         return
 
@@ -116,9 +115,16 @@ def main():
 
     print('philled')
 
-    if choice == '1' and (
-        input('\nAdd this date to the local log (to avoid resubmission)? [Y/n] ').lower() or 'y'
-    ) == 'y':
+    if (
+        choice == '1'
+        and (
+            input(
+                '\nAdd this date to the local log (to avoid resubmission)? [Y/n] '
+            ).lower()
+            or 'y'
+        )
+        == 'y'
+    ):
         print('saving')
         submitted_dates.append(start_time.strftime('%Y-%m-%d'))
         with DATE_FILE.open('w') as f:
@@ -131,4 +137,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print('interrupted')
