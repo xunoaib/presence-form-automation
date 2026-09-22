@@ -274,7 +274,7 @@ def submit_preview(driver: WebDriver):
     xpath(driver, '//a[text()="Preview Response"]')[0].click()
 
 
-def show_submission_menu(driver: WebDriver):
+def show_submission_menu(driver: WebDriver, auto_choice: str | None = None):
     print()
     print('Submission Actions:')
     print()
@@ -282,7 +282,12 @@ def show_submission_menu(driver: WebDriver):
     print('2. Preview Response')
     print('3. Save as Draft')
     print()
-    choice = input('Choice (leave blank to skip): ').strip()
+
+    if auto_choice is not None:
+        choice = auto_choice
+        print(f'Choice (leave blank to skip): {choice}')
+    else:
+        choice = input('Choice (leave blank to skip): ').strip()
 
     match choice:
         case '1':

@@ -5,6 +5,7 @@ import traceback
 from collections.abc import Iterable
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
+from time import sleep
 
 from dotenv import load_dotenv
 from selenium import webdriver
@@ -116,7 +117,9 @@ def main():
     choice = None
     try:
         fill_event_registration_form(driver, data)
-        choice = show_submission_menu(driver)
+        if auto_yes:
+            sleep(3)
+        choice = show_submission_menu(driver, auto_choice='1' if auto_yes else None)
     except Exception:
         traceback.print_exc()
     except KeyboardInterrupt:
