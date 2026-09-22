@@ -122,8 +122,10 @@ def main():
         choice = show_submission_menu(driver, auto_choice='1' if auto_yes else None)
     except Exception:
         traceback.print_exc()
+        return
     except KeyboardInterrupt:
         print('interrupted')
+        return
 
     print('philled')
 
