@@ -2,7 +2,10 @@ from functools import partial, wraps
 from pathlib import Path
 from time import sleep
 
-from selenium.common.exceptions import ElementClickInterceptedException
+from selenium.common.exceptions import (
+    ElementClickInterceptedException,
+    TimeoutException,
+)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
@@ -17,11 +20,11 @@ def xpath(elt: WebElement | WebDriver, xpath: str):
 
 
 def retry(max_attempts=3, delay=0.5):
-    '''
+    """
     Adds retry behavior to functions which might try to click on obscured
     elements before they're ready (i.e. those covered by dropdowns/popups which
     are still closing), causing a ClickIntercepted exception.
-    '''
+    """
 
     def decorator(func):
 
@@ -61,7 +64,11 @@ def fill_text_field(
     exact: bool = False,
 ):
     print('Filling text', search, fill_value)
-    match = f'normalize-space(text())="{search}"' if exact else f'contains(text(),"{search}")'
+    match = (
+        f'normalize-space(text())="{search}"'
+        if exact
+        else f'contains(text(),"{search}")'
+    )
     elt = wait_until_clickable(driver, f'//*[{match}]/..')
     input = xpath(elt, './/input')[0]
     input.clear()
@@ -80,14 +87,14 @@ def select_option(driver: WebDriver, desc_contains: str, option_contains: str):
 
     dropdown = wait_until_clickable(
         driver,
-        f'//*[contains(text(),"{desc_contains}")]/../..//*[contains(@class, "chosen-container")]'
+        f'//*[contains(text(),"{desc_contains}")]/../..//*[contains(@class, "chosen-container")]',
     )
     dropdown.click()  # may not trigger
     dropdown.click()
 
     option = wait_until_clickable(
         driver,
-        f"//li[contains(@class,'active-result') and contains(text(),'{option_contains}')]"
+        f"//li[contains(@class,'active-result') and contains(text(),'{option_contains}')]",
     )
     option.click()
 
@@ -98,19 +105,16 @@ def fill_rich_form(driver: WebDriver, contains_str: str, fill_html: str):
     # switch to HTML mode
     buttons = xpath(
         driver,
-        f'//*[contains(text(),"{contains_str}")]/..//button[contains(@title,"Toggle html")]'
+        f'//*[contains(text(),"{contains_str}")]/..//button[contains(@title,"Toggle html")]',
     )
     assert len(buttons) == 1
     buttons[0].click()
 
     area = xpath(
-        driver,
-        f'//*[contains(text(),"{contains_str}")]/..//*[@contenteditable]'
+        driver, f'//*[contains(text(),"{contains_str}")]/..//*[@contenteditable]'
     )[0]
 
-    driver.execute_script(
-        'arguments[0].innerHTML = arguments[1];', area, fill_html
-    )
+    driver.execute_script('arguments[0].innerHTML = arguments[1];', area, fill_html)
 
     buttons[0].click()  # click again to refresh state
 
@@ -125,7 +129,7 @@ def click_input_with_label(
     while True:
         elts = xpath(
             driver,
-            f'//label[contains(text(),"{contains_str}")]/..//input[@aria-label="{selected_label}"]'
+            f'//label[contains(text(),"{contains_str}")]/..//input[@aria-label="{selected_label}"]',
         )
         if elts:
             elts[0].click()
@@ -140,10 +144,10 @@ def form_has_loaded(driver: WebDriver):
 
 
 def fill_event_registration_form(driver: WebDriver, data: EventForm):
-    '''
+    """
     Fills out a specific event registration form using the provided form data.
     This can also serve as reference for automating other forms.
-    '''
+    """
 
     print('Waiting for form to be ready... ', end='', flush=True)
     while not form_has_loaded(driver):
@@ -163,10 +167,7 @@ def fill_event_registration_form(driver: WebDriver, data: EventForm):
 
     text('Event Location', data.location)
     click('Is this a virtual event?', data.is_virtual)
-    click(
-        'Is this event being held on campus or off campus?',
-        data.on_or_off_campus
-    )
+    click('Is this event being held on campus or off campus?', data.on_or_off_campus)
 
     path = str(Path(data.cover_image_file_path).absolute())
     file_input = xpath(
@@ -184,7 +185,7 @@ def fill_event_registration_form(driver: WebDriver, data: EventForm):
 
     click(
         'Department/Office/Program or a Recognized Student Organization?',
-        data.event_creator_source
+        data.event_creator_source,
     )
 
     text('Contact Person', data.contact_person)
@@ -203,75 +204,77 @@ def fill_event_registration_form(driver: WebDriver, data: EventForm):
     click('Will your event be AFTER 2:00', data.after_2pm_or_weekend)
     click(
         'Will you need to access the space before your event?',
-        data.need_access_beforehand
+        data.need_access_beforehand,
     )
-    text(
-        'What is the estimated attendance for your event?',
-        data.estimated_attendance
-    )
+    text('What is the estimated attendance for your event?', data.estimated_attendance)
 
     click(
         'Are you the person In charge of planning/managing this event for your organization?',
-        data.is_submitter_in_charge
+        data.is_submitter_in_charge,
     )
     click(
         'Are you collaborating/partnering with other student organizations',
-        data.is_multi_org_collab
+        data.is_multi_org_collab,
     )
     click('Does the event have content that is religious', data.is_religious)
     click('Will money be exchanged', data.is_money_exchanged)
     click(
         'students, faculty or staff, will your event guests, participants, vendors, etc. need to park on campus?',
-        data.is_parking_needed
+        data.is_parking_needed,
     )
     click('Do you plan to serve food at your event?', data.is_serving_food)
     click(
         'Do you plan to have alcohol be served/consumed during this event?',
-        data.is_serving_alcohol
+        data.is_serving_alcohol,
     )
-    click(
-        'Is this event being held inside or outside?', data.inside_or_outside
-    )
+    click('Is this event being held inside or outside?', data.inside_or_outside)
 
-    select(
-        'What facility/space do you want to reserve', data.facility_or_space
-    )
+    select('What facility/space do you want to reserve', data.facility_or_space)
     select('What space/room are you requesting', data.requested_room)
 
-    text(
-        "If you don't see the room you want, write it in here.",
-        data.room_if_unlisted
-    )
+    text("If you don't see the room you want, write it in here.", data.room_if_unlisted)
 
-    select(
-        'Please select the space setup needed for your event',
-        data.requested_setup
-    )
+    select('Please select the space setup needed for your event', data.requested_setup)
 
     click(
         'Do you need any additional equipment available from Conference Services?',
-        data.need_additional_equipment
+        data.need_additional_equipment,
     )
 
-    agrees = xpath(
-        driver, '//label[text()="I agree" or text()="I agee"]/../input'
-    )
+    agrees = xpath(driver, '//label[text()="I agree" or text()="I agee"]/../input')
     for agree in agrees:
         agree.click()
 
 
+def wait_for_submission(
+    driver: WebDriver, clicked_element: WebElement, timeout: float = 30
+):
+    print('Waiting for submission to be processed...', end='', flush=True)
+    try:
+        WebDriverWait(driver, timeout).until(EC.staleness_of(clicked_element))
+        print(' done')
+    except TimeoutException:
+        print(' timed out - submission may not have completed, check the browser')
+
+
 def submit_form(driver: WebDriver):
-    xpath(driver, '//button[@id="submit-form-button"]')[0].click()
+    button = xpath(driver, '//button[@id="submit-form-button"]')[0]
+    button.click()
+    wait_for_submission(driver, button)
 
 
 def submit_draft(driver: WebDriver):
     xpath(driver, '//button[contains(@class,"dropdown-toggle")]')[0].click()
-    xpath(driver, '//a[text()="Save as Draft"]')[0].click()
+    link = xpath(driver, '//a[text()="Save as Draft"]')[0]
+    link.click()
+    wait_for_submission(driver, link)
 
 
 def submit_preview(driver: WebDriver):
     xpath(driver, '//button[contains(@class,"dropdown-toggle")]')[0].click()
-    xpath(driver, '//a[text()="Preview Response"]')[0].click()
+    link = xpath(driver, '//a[text()="Preview Response"]')[0]
+    link.click()
+    wait_for_submission(driver, link)
 
 
 def show_submission_menu(driver: WebDriver, auto_choice: str | None = None):
