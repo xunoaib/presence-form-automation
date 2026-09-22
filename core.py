@@ -5,6 +5,8 @@ from time import sleep
 
 from selenium.common.exceptions import (
     ElementClickInterceptedException,
+    StaleElementReferenceException,
+    TimeoutException,
     WebDriverException,
 )
 from selenium.webdriver.common.by import By
@@ -36,12 +38,12 @@ def retry(max_attempts=3, delay=0.5):
             for attempt in range(1, max_attempts + 1):
                 try:
                     return func(*args, **kwargs)
-                except ElementClickInterceptedException as e:
+                except (ElementClickInterceptedException, StaleElementReferenceException) as e:
                     last_exception = e
                     if attempt == max_attempts:
                         break
                     print(
-                        f'\033[93mClickIntercepted in {func.__name__!r}. Retrying momentarily...\033[0m'
+                        f'\033[93m{type(e).__name__} in {func.__name__!r}. Retrying momentarily...\033[0m'
                     )
                     sleep(delay)
 
@@ -54,7 +56,10 @@ def retry(max_attempts=3, delay=0.5):
 
 
 def wait_until_clickable(driver: WebDriver, xpath: str, timeout: float = 5):
-    wait = WebDriverWait(driver, timeout)
+    # options can go stale mid-poll if the dropdown re-renders; keep polling instead of raising
+    wait = WebDriverWait(
+        driver, timeout, ignored_exceptions=(StaleElementReferenceException,)
+    )
     return wait.until(EC.element_to_be_clickable((By.XPATH, xpath)))
 
 
@@ -90,13 +95,28 @@ def select_option(driver: WebDriver, desc_contains: str, option_contains: str):
         driver,
         f'//*[contains(text(),"{desc_contains}")]/../..//*[contains(@class, "chosen-container")]',
     )
-    dropdown.click()  # may not trigger
-    dropdown.click()
 
-    option = wait_until_clickable(
-        driver,
-        f"//li[contains(@class,'active-result') and contains(text(),'{option_contains}')]",
+    option_xpath = (
+        f"//li[contains(@class,'active-result') and contains(text(),'{option_contains}')]"
     )
+
+    option = None
+    for _ in range(3):
+        # only click if closed; clicking while open closes it again
+        if 'chosen-container-active' not in (dropdown.get_attribute('class') or ''):
+            dropdown.click()
+
+        try:
+            option = wait_until_clickable(driver, option_xpath, timeout=3)
+            break
+        except TimeoutException:
+            continue
+
+    if option is None:
+        raise TimeoutException(
+            f'Could not open dropdown for {desc_contains!r} to select {option_contains!r}'
+        )
+
     option.click()
 
 
