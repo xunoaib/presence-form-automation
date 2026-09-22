@@ -117,7 +117,7 @@ def main():
     print('philled')
 
     if choice == '1' and (
-        input('\nUpdate dates? [Y/n] ').lower() or 'y'
+        input('\nAdd this date to the local log (to avoid resubmission)? [Y/n] ').lower() or 'y'
     ) == 'y':
         print('saving')
         submitted_dates.append(start_time.strftime('%Y-%m-%d'))
