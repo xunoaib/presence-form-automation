@@ -1,10 +1,11 @@
+import time
 from functools import partial, wraps
 from pathlib import Path
 from time import sleep
 
 from selenium.common.exceptions import (
     ElementClickInterceptedException,
-    TimeoutException,
+    WebDriverException,
 )
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.webdriver import WebDriver
@@ -246,35 +247,64 @@ def fill_event_registration_form(driver: WebDriver, data: EventForm):
         agree.click()
 
 
+def install_network_tracker(driver: WebDriver):
+    '''Patches fetch/XHR so pending-request state is readable from Python.'''
+    driver.execute_script(Path('network_tracker.js').read_text())
+
+
 def wait_for_submission(
-    driver: WebDriver, clicked_element: WebElement, timeout: float = 30
+    driver: WebDriver,
+    timeout: float = 30,
+    quiet_period: float = 1.5,
+    poll_interval: float = 0.25,
 ):
+    '''Waits for network activity to quiet down after a submit click.'''
     print('Waiting for submission to be processed...', end='', flush=True)
-    try:
-        WebDriverWait(driver, timeout).until(EC.staleness_of(clicked_element))
-        print(' done')
-    except TimeoutException:
-        print(' timed out - submission may not have completed, check the browser')
+    deadline = time.time() + timeout
+    quiet_since = None
+
+    while time.time() < deadline:
+        try:
+            pending = driver.execute_script(
+                'return window.__rtkNetworkTracker ? window.__rtkNetworkTracker.pending : 0;'
+            )
+        except WebDriverException:
+            # page navigated away / context destroyed - treat as complete
+            print(' done (page navigated)')
+            return
+
+        if pending == 0:
+            if quiet_since is None:
+                quiet_since = time.time()
+            elif time.time() - quiet_since >= quiet_period:
+                print(' done')
+                return
+        else:
+            quiet_since = None
+
+        sleep(poll_interval)
+
+    print(' timed out - submission may not have completed, check the browser')
 
 
 def submit_form(driver: WebDriver):
-    button = xpath(driver, '//button[@id="submit-form-button"]')[0]
-    button.click()
-    wait_for_submission(driver, button)
+    install_network_tracker(driver)
+    xpath(driver, '//button[@id="submit-form-button"]')[0].click()
+    wait_for_submission(driver)
 
 
 def submit_draft(driver: WebDriver):
+    install_network_tracker(driver)
     xpath(driver, '//button[contains(@class,"dropdown-toggle")]')[0].click()
-    link = xpath(driver, '//a[text()="Save as Draft"]')[0]
-    link.click()
-    wait_for_submission(driver, link)
+    xpath(driver, '//a[text()="Save as Draft"]')[0].click()
+    wait_for_submission(driver)
 
 
 def submit_preview(driver: WebDriver):
+    install_network_tracker(driver)
     xpath(driver, '//button[contains(@class,"dropdown-toggle")]')[0].click()
-    link = xpath(driver, '//a[text()="Preview Response"]')[0]
-    link.click()
-    wait_for_submission(driver, link)
+    xpath(driver, '//a[text()="Preview Response"]')[0].click()
+    wait_for_submission(driver)
 
 
 def show_submission_menu(driver: WebDriver, auto_choice: str | None = None):
